@@ -1,0 +1,46 @@
+# Render Blueprint — deploys the backend + frontend together as one stack.
+# In Render: New → Blueprint → pick this repo. It reads this file and creates
+# both services. You only fill in the secret values marked `sync: false`.
+# Docs: https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: receiptsys-backend
+    runtime: docker
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      # --- secrets: paste these in the Render dashboard ---
+      - key: AI_API_KEY            # Anthropic Claude key (sk-ant-...)
+        sync: false
+      - key: OCR_OPENAI_API_KEY    # OpenAI key used for OCR (sk-proj-...)
+        sync: false
+      # --- non-secret defaults ---
+      - key: AI_BASE_URL
+        value: https://api.anthropic.com
+      - key: AI_MODEL
+        value: claude-sonnet-4-5
+      - key: OCR_ENGINE
+        value: openai
+      - key: OCR_OPENAI_BASE_URL
+        value: https://api.openai.com/v1
+      - key: OCR_OPENAI_MODEL
+        value: gpt-4o-mini
+
+  - type: web
+    name: receiptsys-frontend
+    runtime: docker
+    rootDir: frontend
+    dockerfilePath: ./Dockerfile
+    plan: free
+    envVars:
+      # Auto-wired to the backend's hostname — no manual entry needed.
+      - key: PYTHON_BACKEND_URL
+        fromService:
+          type: web
+          name: receiptsys-backend
+          property: host
+      # The access password testers must enter. Set this in the dashboard.
+      - key: APP_PASSWORD
+        sync: false

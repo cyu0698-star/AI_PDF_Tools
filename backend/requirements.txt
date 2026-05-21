@@ -1,0 +1,11 @@
+# Core runtime deps (deployment). OCR runs via OpenAI-compatible API (OCR_ENGINE=openai),
+# so the heavy local Paddle/OpenCV stack is NOT installed here.
+# For local PaddleOCR (OCR_ENGINE=paddle), also install requirements-paddle.txt.
+google-genai>=1.0.0
+fastapi>=0.109.0
+uvicorn[standard]>=0.27.0
+python-multipart>=0.0.6
+pydantic>=2.0.0
+python-dotenv>=1.0.0
+openpyxl>=3.1.0
+httpx>=0.27.0

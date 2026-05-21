@@ -1,0 +1,46 @@
+services:
+  backend:
+    container_name: receiptsys-backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    env_file:
+      - ./backend/.env
+    ports:
+      - "8000:8000"
+    volumes:
+      - backend_paddlex_cache:/root/.paddlex
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=3)"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 180s
+
+  frontend:
+    container_name: receiptsys-frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    environment:
+      PYTHON_BACKEND_URL: http://backend:8000
+      WATCHPACK_POLLING: "true"
+      OCR_PROVIDER: http
+      OCR_HTTP_URL: http://backend:8000/api/ocr
+      OCR_HTTP_TIMEOUT_MS: "180000"
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - frontend_node_modules:/app/node_modules
+      - frontend_next:/app/.next
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  backend_paddlex_cache:
+  frontend_node_modules:
+  frontend_next:

@@ -1,0 +1,10 @@
+# Optional: local PaddleOCR engine (OCR_ENGINE=paddle).
+# Heavy (multi-GB) — only install if you want OCR to run on this machine
+# instead of via the OpenAI-compatible API. Install on top of requirements.txt:
+#   pip install -r requirements.txt -r requirements-paddle.txt
+numpy>=1.26.0,<2.0.0
+opencv-python-headless>=4.10.0
+pillow>=10.0.0
+pypdfium2>=4.0.0
+paddlepaddle>=3.0.0
+paddleocr>=2.7.3

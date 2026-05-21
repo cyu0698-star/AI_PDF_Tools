@@ -1,0 +1,51 @@
+# OS
+.DS_Store
+
+# Editor
+.idea/
+.vscode/
+
+# Frontend (Next.js)
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/coverage/
+frontend/.pnp
+frontend/.pnp.js
+frontend/.yarn/install-state.gz
+frontend/.vercel
+frontend/*.tsbuildinfo
+frontend/next-env.d.ts
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/.env*.local
+
+# Backend (Python)
+backend/.venv/
+backend/__pycache__/
+backend/**/*.pyc
+backend/.pytest_cache/
+backend/.mypy_cache/
+backend/.ruff_cache/
+backend/.env
+backend/.env.*
+!backend/.env.example
+
+# Generic
+*.pem
+
+# Local sample data / test artifacts (contain real business documents — do not publish)
+/test_output/
+/test_proceed/
+/03
+/output_*.xlsx
+/*.pdf
+/副本*.xls
+/副本*.xlsx
+/报价单模板.xlsx
+/送货单.png
+
+# Local helper scripts that embed personal API keys
+/refresh_api_key_final.sh
+/frontend/start-frontend.sh.txt
