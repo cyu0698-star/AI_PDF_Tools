@@ -35,12 +35,13 @@ services:
     dockerfilePath: ./Dockerfile
     plan: free
     envVars:
-      # Auto-wired to the backend's hostname — no manual entry needed.
+      # Backend public URL. We hard-code the full https:// URL instead of
+      # `fromService property: host` because that property returns Render's
+      # internal short name (e.g. `receiptsys-backend`), which only resolves
+      # over Render's private network — DNS fails (ENOTFOUND) on the public
+      # network the free tier uses.
       - key: PYTHON_BACKEND_URL
-        fromService:
-          type: web
-          name: receiptsys-backend
-          property: host
+        value: https://receiptsys-backend.onrender.com
       # The access password testers must enter. Set this in the dashboard.
       - key: APP_PASSWORD
         sync: false
