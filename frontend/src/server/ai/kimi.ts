@@ -8,7 +8,7 @@ import {
   isPdfMimeType,
 } from "@/server/layout/fileTypes.mjs";
 import { buildLowConfidenceFields } from "@/server/layout/confidence.mjs";
-import { backendBaseUrl } from "@/lib/backendUrl.mjs";
+import { fetchBackend, friendlyBackendError } from "@/lib/fetchBackend.mjs";
 import {
   mapCompanyInfo,
   mapSummary,
@@ -69,15 +69,14 @@ async function callAIViaBackend(
   prompt: string,
   maxTokens: number = 4096
 ): Promise<Record<string, unknown>> {
-  const backendUrl = backendBaseUrl() || "http://127.0.0.1:8000";
-  const resp = await fetch(`${backendUrl}/api/ai-vision`, {
+  const resp = await fetchBackend("/api/ai-vision", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ fileBase64, mimeType, prompt, maxTokens }),
   });
   if (!resp.ok) {
     const errBody = await resp.text();
-    throw new Error(`后端 AI 调用失败: ${resp.status} - ${errBody.slice(0, 400)}`);
+    throw new Error(friendlyBackendError(resp.status, errBody));
   }
   const data = (await resp.json()) as { result?: Record<string, unknown> };
   return data.result || {};
@@ -363,8 +362,7 @@ ${summaryFieldsBlock}
   // The strict prompt above is now mirrored inside backend/template_extract.py;
   // we just need to forward the structured request here.
   void prompt; // kept above for source-of-truth comparison vs backend
-  const backendUrl = backendBaseUrl() || "http://127.0.0.1:8000";
-  const backendResp = await fetch(`${backendUrl}/api/template-extract`, {
+  const backendResp = await fetchBackend("/api/template-extract", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -379,7 +377,7 @@ ${summaryFieldsBlock}
   });
   if (!backendResp.ok) {
     const errBody = await backendResp.text();
-    throw new Error(`后端模板提取失败: ${backendResp.status} - ${errBody.slice(0, 400)}`);
+    throw new Error(friendlyBackendError(backendResp.status, errBody));
   }
   const parsed = (await backendResp.json()) as Record<string, unknown>;
   const rawCompanyInfo = (parsed.companyInfo as Record<string, unknown>) || {};
