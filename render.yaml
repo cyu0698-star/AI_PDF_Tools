@@ -44,3 +44,7 @@ services:
       # The access password testers must enter. Set this in the dashboard.
       - key: APP_PASSWORD
         sync: false
+      # OCR fetch timeout. Long enough to absorb the free-tier backend's
+      # ~50s cold-start spin-up (default 10s would fetch-fail every time).
+      - key: OCR_HTTP_TIMEOUT_MS
+        value: "180000"
