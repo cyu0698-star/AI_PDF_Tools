@@ -14,6 +14,7 @@ import {
 } from "@/features/documents/types";
 import { saveTemplate, generateTemplateId } from "@/features/templates/storage/templateStorage";
 import { buildNonJsonApiError, parseJsonSafely } from "@/lib/http";
+import { useTr } from "@/lib/i18nClient";
 
 interface TemplateCreatorModalProps {
   isOpen: boolean;
@@ -394,6 +395,7 @@ export default function TemplateCreatorModal({
   onClose,
   onSaved,
 }: TemplateCreatorModalProps) {
+  const tr = useTr();
   const [step, setStep] = useState<ModalStep>("upload");
   const [isDragging, setIsDragging] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
@@ -424,14 +426,14 @@ export default function TemplateCreatorModal({
 
   const processFile = useCallback(async (file: File) => {
     if (file.size > MAX_FILE_SIZE) {
-      setError("文件大小超过 50MB 限制");
+      setError(tr("文件大小超过 50MB 限制"));
       return;
     }
 
     const isImage = file.type.startsWith("image/");
     const isPdf = file.type === "application/pdf";
     if (!isImage && !isPdf) {
-      setError("请上传图片或 PDF 文件");
+      setError(tr("请上传图片或 PDF 文件"));
       return;
     }
 
@@ -463,7 +465,7 @@ export default function TemplateCreatorModal({
         const payload = asObject(data);
 
         if (!response.ok) {
-          throw new Error((payload.error as string) || "识别失败");
+          throw new Error((payload.error as string) || tr("识别失败"));
         }
 
         if (payload.recognizedStructure) {
@@ -486,7 +488,7 @@ export default function TemplateCreatorModal({
         setTemplateName(`${categoryName}模板`);
         setStep("preview");
       } catch (err) {
-        setError(err instanceof Error ? err.message : "模板识别失败");
+        setError(err instanceof Error ? err.message : tr("模板识别失败，请重试"));
         setStep("upload");
       }
     };
@@ -540,7 +542,7 @@ export default function TemplateCreatorModal({
   const handleSave = () => {
     if (!recognizedStructure || !templateName.trim()) return;
     if (layoutQuality && !layoutQuality.isQualified) {
-      setError("模板质量不足，无法保存。请重新上传更清晰、更完整的模板。");
+      setError(tr("模板质量不足，无法保存。请重新上传更清晰、更完整的模板。"));
       return;
     }
 
@@ -637,11 +639,11 @@ export default function TemplateCreatorModal({
         {/* Header */}
         <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-bold text-slate-800">创建{categoryName}模板</h2>
+            <h2 className="text-lg font-bold text-slate-800">{tr(`创建${categoryName}模板`)}</h2>
             <p className="text-sm text-slate-400 mt-0.5">
-              {step === "upload" && "上传您公司的单据截图作为模板"}
-              {step === "recognizing" && "AI 正在识别表单结构..."}
-              {step === "preview" && "确认识别结果并保存模板"}
+              {step === "upload" && tr("上传您公司的单据截图作为模板")}
+              {step === "recognizing" && tr("AI 正在识别表单结构...")}
+              {step === "preview" && tr("确认识别结果并保存模板")}
             </p>
           </div>
           <button
@@ -686,10 +688,10 @@ export default function TemplateCreatorModal({
                   <line x1="12" y1="3" x2="12" y2="15" />
                 </svg>
               </div>
-              <p className="text-slate-600 mb-2">拖拽图片到这里，或</p>
+              <p className="text-slate-600 mb-2">{tr("拖拽图片到这里，或")}</p>
               <label className="cursor-pointer">
                 <span className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-all">
-                  选择文件
+                  {tr("选择文件")}
                 </span>
                 <input
                   type="file"
@@ -698,7 +700,7 @@ export default function TemplateCreatorModal({
                   className="hidden"
                 />
               </label>
-              <p className="text-xs text-slate-400 mt-4">支持 JPG、PNG、PDF，最大 50MB</p>
+              <p className="text-xs text-slate-400 mt-4">{tr("支持 JPG、PNG、PDF，最大 50MB")}</p>
             </div>
           )}
 
@@ -712,11 +714,11 @@ export default function TemplateCreatorModal({
                   <path d="M15.75 14.07A4 4 0 0 1 12 22" />
                 </svg>
               </div>
-              <h3 className="text-lg font-bold text-slate-700 mb-2">AI 正在识别模板结构</h3>
-              <p className="text-sm text-slate-400">正在分析表头、字段类型和表单布局...</p>
+              <h3 className="text-lg font-bold text-slate-700 mb-2">{tr("AI 正在识别模板结构")}</h3>
+              <p className="text-sm text-slate-400">{tr("正在分析表头、字段类型和表单布局...")}</p>
               {previewImage && (
                 <div className="mt-6">
-                  <img src={previewImage} alt="模板预览" className="max-h-32 mx-auto rounded-lg border border-slate-200" />
+                  <img src={previewImage} alt={tr("模板预览")} className="max-h-32 mx-auto rounded-lg border border-slate-200" />
                 </div>
               )}
             </div>
@@ -726,27 +728,27 @@ export default function TemplateCreatorModal({
             <div className="space-y-6">
               {/* Template name */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">模板名称</label>
+                <label className="block text-sm font-medium text-slate-700 mb-2">{tr("模板名称")}</label>
                 <input
                   type="text"
                   value={templateName}
                   onChange={(e) => setTemplateName(e.target.value)}
                   className="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="输入模板名称"
+                  placeholder={tr("输入模板名称")}
                 />
               </div>
 
               {/* Preview image */}
               {previewImage && !templateLayout && (
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">原始截图</label>
-                  <img src={previewImage} alt="模板预览" className="max-h-40 rounded-lg border border-slate-200" />
+                  <label className="block text-sm font-medium text-slate-700 mb-2">{tr("原始截图")}</label>
+                  <img src={previewImage} alt={tr("模板预览")} className="max-h-40 rounded-lg border border-slate-200" />
                 </div>
               )}
 
               {templateLayout && (
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">模板预览</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">{tr("模板预览")}</label>
                   <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
                     {syntheticPreviewTokens.length > 0 ? (
                       <div
@@ -779,33 +781,33 @@ export default function TemplateCreatorModal({
                       </div>
                     ) : (
                       <div className="rounded-lg border border-slate-300 bg-white p-4 text-xs text-slate-500">
-                        当前未生成可用于仿真布局的文本坐标。
+                        {tr("当前未生成可用于仿真布局的文本坐标。")}
                       </div>
                     )}
 
                     <p className="mt-2 text-xs text-slate-500">
-                      浅蓝: 固定文本 | 绿色: 待填写值 | 橙色: 表头 | 紫色: 表格单元
+                      {tr("浅蓝: 固定文本 | 绿色: 待填写值 | 橙色: 表头 | 紫色: 表格单元")}
                     </p>
                     {layoutTokens.length > 0 && (
                       <p className="mt-1 text-xs text-slate-600">
-                        全量文本块: {layoutTokens.length}（固定:{tokenRoleCounts.fixed_text || 0}，待填:{tokenRoleCounts.fillable_value || 0}，表头:{tokenRoleCounts.table_header || 0}，表格:{tokenRoleCounts.table_cell || 0}）
+                        {tr("全量文本块")}: {layoutTokens.length}（{tr("固定")}:{tokenRoleCounts.fixed_text || 0}，{tr("待填")}:{tokenRoleCounts.fillable_value || 0}，{tr("表头")}:{tokenRoleCounts.table_header || 0}，{tr("表格")}:{tokenRoleCounts.table_cell || 0}）
                       </p>
                     )}
                     {usesMockOcr && (
                       <p className="mt-1 text-xs text-amber-700">
-                        当前为 Mock OCR 坐标，仅用于流程演示，位置可能与真实模板不一致。
+                        {tr("当前为 Mock OCR 坐标，仅用于流程演示，位置可能与真实模板不一致。")}
                       </p>
                     )}
                     {!hasLayoutAnchors && (
                       <p className="mt-1 text-xs text-amber-600">
-                        当前模板暂无坐标锚点，请重新上传更清晰或更完整的模板。
+                        {tr("当前模板暂无坐标锚点，请重新上传更清晰或更完整的模板。")}
                       </p>
                     )}
                   </div>
 
                   {tablePreview && (
                     <div className="mt-3 rounded-xl border border-slate-200 bg-white p-3">
-                      <p className="mb-2 text-xs font-medium text-slate-600">模板表格预览</p>
+                      <p className="mb-2 text-xs font-medium text-slate-600">{tr("模板表格预览")}</p>
                       <div className="overflow-x-auto">
                         <table className="min-w-full border-collapse text-xs">
                           <thead>
@@ -815,7 +817,7 @@ export default function TemplateCreatorModal({
                                   key={`tpl-th-${idx}`}
                                   className="border border-slate-300 bg-slate-100 px-2 py-1 text-left font-semibold text-slate-700"
                                 >
-                                  {header || `列${idx + 1}`}
+                                  {header || `${tr("列")}${idx + 1}`}
                                 </th>
                               ))}
                             </tr>
@@ -848,14 +850,14 @@ export default function TemplateCreatorModal({
                     : "border-amber-200 bg-amber-50 text-amber-700"
                 }`}>
                   <p className="font-medium">
-                    模板质量: {layoutQuality.isQualified ? "合格" : "不合格"}
+                    {tr("模板质量")}: {layoutQuality.isQualified ? tr("合格") : tr("不合格")}
                   </p>
                   <p>
-                    OCR Token: {layoutQuality.ocrTokenCount}，锚点覆盖: {layoutQuality.anchoredFields}/{layoutQuality.totalFields} ({Math.round(layoutQuality.anchorRate * 100)}%)，置信度: {layoutQuality.confidence.toFixed(3)}
+                    OCR Token: {layoutQuality.ocrTokenCount}，{tr("锚点覆盖")}: {layoutQuality.anchoredFields}/{layoutQuality.totalFields} ({Math.round(layoutQuality.anchorRate * 100)}%)，{tr("置信度")}: {layoutQuality.confidence.toFixed(3)}
                   </p>
                   {!layoutQuality.isQualified && layoutQuality.failures.length > 0 && (
                     <p className="mt-1 text-xs">
-                      原因: {layoutQuality.failures.join(", ")}
+                      {tr("原因")}: {layoutQuality.failures.join(", ")}
                     </p>
                   )}
                 </div>
@@ -864,10 +866,10 @@ export default function TemplateCreatorModal({
               {layoutDiagnostics && (
                 <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs text-slate-600">
                   <p>
-                    解析通道: {layoutDiagnostics.pipeline} | OCR: {layoutDiagnostics.ocrProvider} | Token来源: {layoutDiagnostics.tokenSource}
+                    {tr("解析通道")}: {layoutDiagnostics.pipeline} | OCR: {layoutDiagnostics.ocrProvider} | {tr("Token来源")}: {layoutDiagnostics.tokenSource}
                   </p>
                   <p>
-                    主问题: {layoutDiagnostics.primaryIssue}
+                    {tr("主问题")}: {layoutDiagnostics.primaryIssue}
                   </p>
                   {layoutDiagnostics.warnings.length > 0 && (
                     <p>Warnings: {layoutDiagnostics.warnings.join(", ")}</p>
@@ -879,7 +881,7 @@ export default function TemplateCreatorModal({
               {recognizedStructure.companyInfo.fields.length > 0 && (
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
-                    公司信息字段 ({recognizedStructure.companyInfo.fields.length})
+                    {tr("公司信息字段")} ({recognizedStructure.companyInfo.fields.length})
                   </label>
                   <div className="flex flex-wrap gap-2">
                     {recognizedStructure.companyInfo.fields.map((field, i) => (
@@ -899,7 +901,7 @@ export default function TemplateCreatorModal({
               {recognizedStructure.tableHeaders.length > 0 && (
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
-                    表格列 ({recognizedStructure.tableHeaders.length})
+                    {tr("表格列")} ({recognizedStructure.tableHeaders.length})
                   </label>
                   <div className="overflow-x-auto">
                     <div className="flex gap-2 pb-2">
@@ -925,7 +927,7 @@ export default function TemplateCreatorModal({
               {recognizedStructure.summaryFields.length > 0 && (
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
-                    汇总字段 ({recognizedStructure.summaryFields.length})
+                    {tr("汇总字段")} ({recognizedStructure.summaryFields.length})
                   </label>
                   <div className="flex flex-wrap gap-2">
                     {recognizedStructure.summaryFields.map((field, i) => (
@@ -951,14 +953,14 @@ export default function TemplateCreatorModal({
               onClick={resetState}
               className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
             >
-              重新上传
+              {tr("重新上传")}
             </button>
             <button
               onClick={handleSave}
               disabled={saveDisabled}
               className="px-5 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              保存模板
+              {tr("保存模板")}
             </button>
           </div>
         )}

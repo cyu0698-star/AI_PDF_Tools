@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from "react";
 import { UploadedFile, ACCEPTED_EXTENSIONS, MAX_FILE_SIZE, formatFileSize, getFileTypeLabel, getFileTypeColor } from "@/features/documents/types";
+import { useTr } from "@/lib/i18nClient";
 
 interface UploadZoneProps {
   files: UploadedFile[];
@@ -11,6 +12,7 @@ interface UploadZoneProps {
 }
 
 export default function UploadZone({ files, onFilesAdded, onFileRemove, onUploadClick }: UploadZoneProps) {
+  const tr = useTr();
   const [isDragging, setIsDragging] = useState(false);
 
   const processFiles = useCallback(
@@ -18,7 +20,7 @@ export default function UploadZone({ files, onFilesAdded, onFileRemove, onUpload
       const file = fileList[0];
       if (!file) return;
       if (file.size > MAX_FILE_SIZE) {
-        alert(`文件 "${file.name}" 超过50MB限制`);
+        alert(`${tr("文件过大")}: "${file.name}"`);
         return;
       }
       const uf: UploadedFile = {
@@ -149,7 +151,7 @@ export default function UploadZone({ files, onFilesAdded, onFileRemove, onUpload
 
             {/* Tip */}
             <p className="text-[11px] text-slate-400 mt-3">
-              当前流程每次仅处理 1 个文件（PDF/图片）。
+              {tr("当前流程每次仅处理 1 个文件（PDF/图片）。")}
             </p>
           </div>
         ) : (
@@ -169,7 +171,7 @@ export default function UploadZone({ files, onFilesAdded, onFileRemove, onUpload
                 ))}
               </div>
               
-              <p className="text-xs text-slate-400 mb-5">文件大小限制 50MB</p>
+              <p className="text-xs text-slate-400 mb-5">{tr("文件大小限制 50MB")}</p>
 
             <label className="cursor-pointer">
               <span className="inline-flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg shadow-md shadow-blue-600/20 hover:bg-blue-700 hover:shadow-lg transition-all">
@@ -178,7 +180,7 @@ export default function UploadZone({ files, onFilesAdded, onFileRemove, onUpload
                   <polyline points="17 8 12 3 7 8" />
                   <line x1="12" y1="3" x2="12" y2="15" />
                 </svg>
-                在你的电脑中选择文件
+                {tr("在你的电脑中选择文件")}
               </span>
               <input
                 type="file"

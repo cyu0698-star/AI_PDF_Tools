@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { TemplateType, CustomTemplate, TEMPLATES } from "@/features/documents/types";
 import { getTemplatesByCategory, deleteTemplate } from "@/features/templates/storage/templateStorage";
+import { useTr } from "@/lib/i18nClient";
 
 interface TemplateSelectorProps {
   selectedType: TemplateType | null;
@@ -21,6 +22,7 @@ export default function TemplateSelector({
   onCreateTemplate,
   refreshKey = 0,
 }: TemplateSelectorProps) {
+  const tr = useTr();
   void _selectedType;
   void _onSelectType;
   const [customTemplates, setCustomTemplates] = useState<Record<TemplateType, CustomTemplate[]>>({
@@ -49,7 +51,7 @@ export default function TemplateSelector({
 
   const handleDeleteTemplate = (e: React.MouseEvent, templateId: string) => {
     e.stopPropagation();
-    if (confirm("确定要删除这个模板吗？")) {
+    if (confirm(tr("确定要删除这个模板吗？"))) {
       deleteTemplate(templateId);
       const templates: Record<TemplateType, CustomTemplate[]> = {
         delivery_note: getTemplatesByCategory("delivery_note"),
@@ -92,7 +94,7 @@ export default function TemplateSelector({
             <div key={t.id} className="space-y-2">
               {/* Category header */}
               <div className="flex items-center gap-2">
-                <span className="text-xs font-medium text-slate-500">{t.name}</span>
+                <span className="text-xs font-medium text-slate-500">{tr(t.name)}</span>
                 <div className="flex-1 h-px bg-slate-100"></div>
               </div>
 
@@ -149,7 +151,7 @@ export default function TemplateSelector({
                   <line x1="12" y1="5" x2="12" y2="19" />
                   <line x1="5" y1="12" x2="19" y2="12" />
                 </svg>
-                上传{t.name}模板
+                {tr(`上传${t.name}模板`)}
               </button>
             </div>
           );
@@ -160,24 +162,24 @@ export default function TemplateSelector({
 
   return (
     <div className="w-[300px] flex-shrink-0">
-      <h3 className="text-base font-bold text-slate-800 mb-1">模版选择</h3>
+      <h3 className="text-base font-bold text-slate-800 mb-1">{tr("模版选择")}</h3>
       <p className="text-[11px] text-slate-400 mb-5 leading-relaxed">
-        选择已有模板或上传新模板，然后上传原始单据进行数据提取。
+        {tr("选择已有模板或上传新模板，然后上传原始单据进行数据提取。")}
       </p>
 
       {/* Sales templates */}
-      {renderCategorySection("销售业务", salesTemplates)}
+      {renderCategorySection(tr("销售业务"), salesTemplates)}
 
       {/* Finance templates */}
-      {renderCategorySection("财务业务", financeTemplates)}
+      {renderCategorySection(tr("财务业务"), financeTemplates)}
 
       {/* Tip */}
       <div className="mt-4 p-3 bg-blue-50 rounded-lg">
         <p className="text-xs text-blue-600 leading-relaxed">
-          <strong>使用说明：</strong>
-          <br />1. 点击&quot;上传XX模板&quot;创建新模板
-          <br />2. 选择已有模板后，上传原始单据
-          <br />3. AI 将自动提取数据并填充
+          <strong>{tr("使用说明：")}</strong>
+          <br />{tr("1. 点击\"上传XX模板\"创建新模板")}
+          <br />{tr("2. 选择已有模板后，上传原始单据")}
+          <br />{tr("3. AI 将自动提取数据并填充")}
         </p>
       </div>
     </div>

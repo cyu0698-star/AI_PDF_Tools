@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTr } from "@/lib/i18nClient";
 
 interface SidebarProps {
   activeTab: string;
@@ -8,12 +9,13 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ activeTab, onTabChange }: SidebarProps) {
+  const tr = useTr();
   const [showUserMenu, setShowUserMenu] = useState(false);
 
   const tabs = [
     {
       id: "document",
-      label: "文档生成",
+      label: tr("文档生成"),
       icon: (
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -25,7 +27,7 @@ export default function Sidebar({ activeTab, onTabChange }: SidebarProps) {
     },
     {
       id: "recharge",
-      label: "充值",
+      label: tr("充值"),
       icon: (
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="9" cy="21" r="1" />
@@ -94,7 +96,7 @@ export default function Sidebar({ activeTab, onTabChange }: SidebarProps) {
                 }}
                 className="w-full px-3 py-2 text-left text-sm text-red-500 hover:bg-red-50 transition-colors"
               >
-                退出登录
+                {tr("退出登录")}
               </button>
             </div>
           </>

@@ -12,6 +12,7 @@ import {
   normalizeTemplateModel,
   normalizeTemplateRecognitionResult,
 } from "@/server/layout/ir.mjs";
+import { serverTr } from "@/lib/i18n";
 
 export const runtime = "nodejs";
 
@@ -30,7 +31,7 @@ export async function POST(request: NextRequest) {
 
     if (!fileBase64 || !mimeType) {
       return NextResponse.json(
-        { error: "缺少必要参数：fileBase64, mimeType" },
+        { error: serverTr("缺少必要参数：fileBase64, mimeType") },
         { status: 400 }
       );
     }
@@ -125,7 +126,7 @@ export async function POST(request: NextRequest) {
     if (templateLayout.ocrTokenCount === 0 && ocrWarnings.length > 0) {
       return NextResponse.json(
         {
-          error: `OCR 服务不可用: ${ocrWarnings[0]}`,
+          error: `${serverTr("OCR 服务不可用")}: ${ocrWarnings[0]}`,
           ocrWarnings,
           diagnostics,
         },
@@ -145,7 +146,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("Template analyze error:", error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "模板分析失败" },
+      { error: error instanceof Error ? error.message : serverTr("模板分析失败") },
       { status: 500 }
     );
   }

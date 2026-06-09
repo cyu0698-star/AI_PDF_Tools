@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { AUTH_COOKIE, expectedAuthToken } from "@/lib/authToken";
+import { serverTr } from "@/lib/i18n";
 
 export const runtime = "nodejs";
 
@@ -19,7 +20,7 @@ export async function POST(req: NextRequest) {
   }
 
   if (!body.password || body.password !== password) {
-    return NextResponse.json({ error: "密码错误" }, { status: 401 });
+    return NextResponse.json({ error: serverTr("密码错误") }, { status: 401 });
   }
 
   const token = await expectedAuthToken(password);

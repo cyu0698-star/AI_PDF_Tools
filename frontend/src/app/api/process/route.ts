@@ -3,6 +3,7 @@ import { processDocument } from "@/server/ai/kimi";
 import { TemplateType } from "@/features/documents/types";
 import { validateTemplateExtractMimeType } from "@/server/layout/fileTypes.mjs";
 import { backendBaseUrl } from "@/lib/backendUrl.mjs";
+import { serverTr } from "@/lib/i18n";
 
 // 确保使用 Node.js 运行时，避免 edge 环境下某些网络限制
 export const runtime = "nodejs";
@@ -21,7 +22,7 @@ export async function POST(request: NextRequest) {
 
     if (!fileBase64 || !mimeType || !templateType) {
       return NextResponse.json(
-        { error: "缺少必要参数：fileBase64, mimeType, templateType" },
+        { error: serverTr("缺少必要参数：fileBase64, mimeType, templateType") },
         { status: 400 }
       );
     }
@@ -38,7 +39,7 @@ export async function POST(request: NextRequest) {
 
       if (!response.ok) {
         return NextResponse.json(
-          { error: data.detail || data.error || "Python 后端处理失败" },
+          { error: data.detail || data.error || serverTr("Python 后端处理失败") },
           { status: response.status }
         );
       }
@@ -60,7 +61,7 @@ export async function POST(request: NextRequest) {
     console.error("AI processing error:", error);
 
     let message =
-      error instanceof Error ? error.message : "AI 处理失败，请重试";
+      error instanceof Error ? error.message : serverTr("AI 处理失败，请重试");
 
     // 网络错误处理
     if (
@@ -68,12 +69,7 @@ export async function POST(request: NextRequest) {
       message.includes("getaddrinfo ENOTFOUND") ||
       message.includes("connect ETIMEDOUT")
     ) {
-      message =
-        "无法连接到 Kimi API：当前运行环境的网络访问不到 api.moonshot.cn。\n" +
-        "请确认：\n" +
-        "1）检查网络连接是否正常；\n" +
-        "2）确认 API Key 是否有效；\n" +
-        "3）尝试稍后重试。";
+      message = serverTr("无法连接到 AI API，请检查网络连接后重试。");
     }
 
     return NextResponse.json({ error: message }, { status: 500 });

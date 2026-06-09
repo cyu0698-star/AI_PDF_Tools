@@ -9,6 +9,7 @@ import {
 } from "@/server/layout/fileTypes.mjs";
 import { buildLowConfidenceFields } from "@/server/layout/confidence.mjs";
 import { fetchBackend, friendlyBackendError } from "@/lib/fetchBackend.mjs";
+import { serverTr, serverTrKey } from "@/lib/i18n";
 import {
   mapCompanyInfo,
   mapSummary,
@@ -21,44 +22,49 @@ import {
 // Kimi/Moonshot direct-API code (callKimi, uploadFileToKimi, getFileContent,
 // KIMI_* constants incl. a hardcoded fallback key) was removed.
 
-const TEMPLATE_PROMPTS: Record<TemplateType, string> = {
-  delivery_note: `你是一个专业的财务文件识别助手。请从上传的文件中提取送货单信息，并以 JSON 格式返回。
+// Resolved per-call so the locale (LOCALE env var) is read at request time —
+// the same module serves both zh and en deployments.
+function getTemplatePrompt(type: TemplateType): string {
+  const zhPrompts: Record<TemplateType, string> = {
+    delivery_note: `你是一个专业的财务文件识别助手。请从上传的文件中提取送货单信息，并以 JSON 格式返回。
 请提取以下字段：
 - headers: 表头数组，例如 ["日期", "品名", "规格", "数量", "单价", "金额", "备注"]
 - rows: 数据行数组，每行是一个对象
 - summary: 摘要信息，包含 totalAmount(总金额), documentDate(单据日期), supplier(供应商/客户), documentType(单据类型), documentNumber(单据编号)
 注意：请忽略盖章、印章、签名等信息。只返回 JSON。`,
-  reconciliation: `你是一个专业的财务文件识别助手。请从上传的文件中提取对账单信息，并以 JSON 格式返回。
+    reconciliation: `你是一个专业的财务文件识别助手。请从上传的文件中提取对账单信息，并以 JSON 格式返回。
 请提取以下字段：
 - headers: 表头数组，例如 ["日期", "摘要", "借方金额", "贷方金额", "余额", "备注"]
 - rows: 数据行数组，每行是一个对象
 - summary: 摘要信息，包含 totalAmount, documentDate, supplier, documentType, documentNumber
 注意：请忽略盖章、印章、签名等信息。只返回 JSON。`,
-  purchase_order: `你是一个专业的财务文件识别助手。请从上传的文件中提取采购单信息，并以 JSON 格式返回。
+    purchase_order: `你是一个专业的财务文件识别助手。请从上传的文件中提取采购单信息，并以 JSON 格式返回。
 请提取以下字段：
 - headers: 表头数组，例如 ["序号", "品名", "规格型号", "单位", "数量", "单价", "金额"]
 - rows: 数据行数组，每行是一个对象
 - summary: 摘要信息，包含 totalAmount, documentDate, supplier, documentType, documentNumber
 注意：请忽略盖章、印章、签名等信息。只返回 JSON。`,
-  bank_statement: `你是一个专业的财务文件识别助手。请从上传的文件中提取银行流水/对账信息，并以 JSON 格式返回。
+    bank_statement: `你是一个专业的财务文件识别助手。请从上传的文件中提取银行流水/对账信息，并以 JSON 格式返回。
 请提取以下字段：
 - headers: 表头数组，例如 ["交易日期", "交易类型", "对方账户", "摘要", "收入", "支出", "余额"]
 - rows: 数据行数组，每行是一个对象
 - summary: 摘要信息，包含 totalAmount, documentDate, supplier, documentType, documentNumber
 注意：请忽略盖章、印章、签名等信息。只返回 JSON。`,
-  payment_list: `你是一个专业的财务文件识别助手。请从上传的文件中提取支付清单信息，并以 JSON 格式返回。
+    payment_list: `你是一个专业的财务文件识别助手。请从上传的文件中提取支付清单信息，并以 JSON 格式返回。
 请提取以下字段：
 - headers: 表头数组，例如 ["序号", "收款方", "账号", "金额", "用途", "日期", "状态"]
 - rows: 数据行数组，每行是一个对象
 - summary: 摘要信息，包含 totalAmount, documentDate, supplier, documentType, documentNumber
 注意：请忽略盖章、印章、签名等信息。只返回 JSON。`,
-  quotation: `你是一个专业的财务文件识别助手。请从上传的文件中提取报价单信息，并以 JSON 格式返回。
+    quotation: `你是一个专业的财务文件识别助手。请从上传的文件中提取报价单信息，并以 JSON 格式返回。
 请提取以下字段：
 - headers: 表头数组，例如 ["序号", "规格", "公斤", "数量/公斤", "单价", "金额", "备注"]
 - rows: 数据行数组，每行是一个对象
 - summary: 摘要信息，包含 totalAmount, documentDate, supplier, documentType, documentNumber, contact, address
 注意：请忽略盖章、印章、签名、水印等信息。只返回 JSON。`,
-};
+  };
+  return serverTrKey(`${type}_prompt`, zhPrompts[type]);
+}
 
 // Generic AI vision call that routes through the Python backend
 // (/api/ai-vision). Avoids the Anthropic Cloudflare 403 that hits Node fetch
@@ -90,7 +96,7 @@ export async function processDocument(
   if (!isPdfMimeType(mimeType) && !isSupportedVisionImageMimeType(mimeType)) {
     throw new Error(`不支持的文件类型: ${mimeType || "unknown"}。仅支持 PDF 或图片。`);
   }
-  const prompt = TEMPLATE_PROMPTS[templateType];
+  const prompt = getTemplatePrompt(templateType);
   const parsed = await callAIViaBackend(fileBase64, mimeType, prompt, 4096);
   return {
     headers: (parsed.headers as string[]) || [],
@@ -105,10 +111,12 @@ export async function recognizeTemplateStructure(
   mimeType: string
 ): Promise<TemplateRecognitionResult> {
   if (!isSupportedVisionImageMimeType(mimeType)) {
-    throw new Error(`模板识别仅支持图片文件（JPG/PNG/WEBP），当前类型: ${mimeType || "unknown"}`);
+    throw new Error(`${serverTr("模板识别仅支持图片文件（JPG/PNG/WEBP），当前类型")}: ${mimeType || "unknown"}`);
   }
 
-  const prompt = `你是一个专业的表单结构分析助手。请分析上传的单据/表单图片，识别其结构并以 JSON 格式返回。
+  const prompt = serverTrKey(
+    "template_structure_prompt",
+    `你是一个专业的表单结构分析助手。请分析上传的单据/表单图片，识别其结构并以 JSON 格式返回。
 
 # 任务
 请识别这张单据/表单的版式结构，输出以下四类信息：
@@ -133,7 +141,8 @@ export async function recognizeTemplateStructure(
   "tableHeaders": [ "...", "..." ],
   "tableFieldTypes": [ "text", "number" ],
   "summaryFields": [ "...", "..." ]
-}`;
+}`
+  );
 
   const parsed = await callAIViaBackend(fileBase64, mimeType, prompt, 4096);
 

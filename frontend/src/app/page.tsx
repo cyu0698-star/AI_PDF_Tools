@@ -2,8 +2,10 @@
 
 import DemoAnimation from "@/features/auth/components/DemoAnimation";
 import LoginForm from "@/features/auth/components/LoginForm";
+import { useTr } from "@/lib/i18nClient";
 
 export default function LoginPage() {
+  const tr = useTr();
   return (
     <div className="flex h-screen">
       {/* Left - Demo Animation */}
@@ -15,7 +17,7 @@ export default function LoginPage() {
       <div className="w-full lg:w-[420px] lg:min-w-[380px] flex flex-col items-center justify-center px-10 py-12 bg-white border-l border-black/5 relative">
         <LoginForm />
         <div className="absolute bottom-5 text-[11px] text-slate-300">
-          © I Love 财务表单 2026
+          {tr("© I Love 财务表单 2026")}
         </div>
       </div>
     </div>

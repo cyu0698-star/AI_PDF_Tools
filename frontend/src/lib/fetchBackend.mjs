@@ -15,6 +15,7 @@
 // Compatible with the existing backendBaseUrl() scheme-tolerance.
 
 import { backendBaseUrl } from "./backendUrl.mjs";
+import { serverTr } from "./i18n";
 
 const DEFAULT_WARMUP_TIMEOUT_MS = 60_000;   // long enough for a cold start
 const DEFAULT_REQUEST_TIMEOUT_MS = 180_000; // long enough for slow AI calls
@@ -67,7 +68,7 @@ export async function pingBackendHealth(timeoutMs = DEFAULT_WARMUP_TIMEOUT_MS) {
 export async function fetchBackend(path, init = {}, opts = {}) {
   const base = backendBaseUrl();
   if (!base) {
-    throw new Error("PYTHON_BACKEND_URL 未配置，无法访问后端");
+    throw new Error(serverTr("PYTHON_BACKEND_URL 未配置，无法访问后端"));
   }
   const {
     timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS,
@@ -112,16 +113,16 @@ export async function fetchBackend(path, init = {}, opts = {}) {
 export function friendlyBackendError(status, body) {
   const detail = String(body || "").slice(0, 200);
   if (status === 502 || status === 503 || status === 504) {
-    return `后端服务正在唤醒中（首次访问约 1 分钟），请稍候再试一次。(${status})`;
+    return `${serverTr("后端服务正在唤醒中（首次访问约 1 分钟），请稍候再试一次。")} (${status})`;
   }
   if (status === 401) {
-    return "登录已过期，请刷新页面重新登录。";
+    return serverTr("登录已过期，请刷新页面重新登录。");
   }
   if (status === 413) {
-    return "文件太大，请压缩到 50 MB 以内再上传。";
+    return serverTr("文件太大，请压缩到 50 MB 以内再上传。");
   }
   if (status === 429) {
-    return "请求太频繁，请稍等几秒后再试。";
+    return serverTr("请求太频繁，请稍等几秒后再试。");
   }
-  return `后端调用失败: ${status}${detail ? " - " + detail : ""}`;
+  return `${serverTr("后端调用失败")}: ${status}${detail ? " - " + detail : ""}`;
 }

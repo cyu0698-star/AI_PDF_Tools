@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from "react";
 import { UploadedFile, ACCEPTED_EXTENSIONS, MAX_FILE_SIZE, formatFileSize, getFileTypeLabel, getFileTypeColor } from "@/features/documents/types";
+import { useTr } from "@/lib/i18nClient";
 
 interface UploadModalProps {
   isOpen: boolean;
@@ -10,6 +11,7 @@ interface UploadModalProps {
 }
 
 export default function UploadModal({ isOpen, onClose, onFilesAdded }: UploadModalProps) {
+  const tr = useTr();
   const [isDragging, setIsDragging] = useState(false);
   const [pendingFiles, setPendingFiles] = useState<UploadedFile[]>([]);
 
@@ -17,7 +19,7 @@ export default function UploadModal({ isOpen, onClose, onFilesAdded }: UploadMod
     const file = fileList[0];
     if (!file) return;
     if (file.size > MAX_FILE_SIZE) {
-      alert(`文件 "${file.name}" 超过50MB限制`);
+      alert(`${tr("文件过大")}: "${file.name}"`);
       return;
     }
     const uf: UploadedFile = {
@@ -72,9 +74,9 @@ export default function UploadModal({ isOpen, onClose, onFilesAdded }: UploadMod
         {/* Header */}
         <div className="flex items-center justify-between px-6 pt-5 pb-3">
           <div>
-            <h3 className="text-lg font-bold text-slate-800">上传文件</h3>
+            <h3 className="text-lg font-bold text-slate-800">{tr("上传文件")}</h3>
             <p className="text-xs text-slate-400 mt-0.5">
-              每次最多可上传一个文件，单个文件大小上限为50 MB。
+              {tr("每次最多可上传一个文件，单个文件大小上限为50 MB。")}
             </p>
           </div>
           <button
@@ -135,7 +137,7 @@ export default function UploadModal({ isOpen, onClose, onFilesAdded }: UploadMod
                 </svg>
                 <p className="text-sm text-slate-500 mb-1">
                   <label className="text-blue-600 font-semibold cursor-pointer hover:underline">
-                    点击上传
+                    {tr("点击上传")}
                     <input
                       type="file"
                       accept={ACCEPTED_EXTENSIONS}
@@ -145,10 +147,10 @@ export default function UploadModal({ isOpen, onClose, onFilesAdded }: UploadMod
                       className="hidden"
                     />
                   </label>
-                  {" "}或者拖拽到这里
+                  {" "}{tr("或者拖拽到这里")}
                 </p>
                 <p className="text-xs text-slate-400">
-                  支持 PDF/JPG/PNG/WEBP
+                  {tr("支持 PDF/JPG/PNG/WEBP")}
                 </p>
               </>
             )}
@@ -162,7 +164,7 @@ export default function UploadModal({ isOpen, onClose, onFilesAdded }: UploadMod
               onClick={handleConfirm}
               className="px-6 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg shadow-sm shadow-blue-600/20 hover:bg-blue-700 transition-all"
             >
-              确认
+              {tr("确认")}
             </button>
           </div>
         )}

@@ -2,6 +2,7 @@
 
 import { ProcessResult } from "@/features/documents/types";
 import { exportProcessResultToExcel, exportToCSV, exportToJSON } from "@/shared/utils/exportUtils";
+import { useTr } from "@/lib/i18nClient";
 
 interface DownloadModalProps {
   isOpen: boolean;
@@ -11,10 +12,11 @@ interface DownloadModalProps {
 }
 
 export default function DownloadModal({ isOpen, onClose, result, templateName }: DownloadModalProps) {
+  const tr = useTr();
   if (!isOpen || !result) return null;
 
   const dateStr = new Date().toISOString().slice(0, 10);
-  const baseName = templateName || '财务表单';
+  const baseName = templateName || tr("财务表单");
 
   const downloadExcel = () => {
     if (!result) return;
@@ -43,7 +45,7 @@ export default function DownloadModal({ isOpen, onClose, result, templateName }:
       <div className="relative bg-white rounded-2xl shadow-2xl w-[420px] overflow-hidden animate-fade-in-up">
         {/* Header */}
         <div className="flex items-center justify-between px-6 pt-5 pb-3">
-          <h3 className="text-lg font-bold text-slate-800">下载文件</h3>
+          <h3 className="text-lg font-bold text-slate-800">{tr("下载文件")}</h3>
           <button
             onClick={onClose}
             className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all"
@@ -69,9 +71,9 @@ export default function DownloadModal({ isOpen, onClose, result, templateName }:
               <div className="flex-1 text-left">
                 <div className="text-sm font-semibold text-slate-700 group-hover:text-green-700 flex items-center gap-2">
                   {baseName}_{dateStr}.xlsx
-                  <span className="text-[10px] px-1.5 py-0.5 bg-green-100 text-green-600 rounded">推荐</span>
+                  <span className="text-[10px] px-1.5 py-0.5 bg-green-100 text-green-600 rounded">{tr("推荐")}</span>
                 </div>
-                <div className="text-[11px] text-slate-400">Excel 格式，支持多工作表</div>
+                <div className="text-[11px] text-slate-400">{tr("Excel 格式，支持多工作表")}</div>
               </div>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-500 group-hover:text-green-600">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -93,7 +95,7 @@ export default function DownloadModal({ isOpen, onClose, result, templateName }:
               <div className="text-sm font-semibold text-slate-700 group-hover:text-blue-700">
                 {baseName}_{dateStr}.csv
               </div>
-              <div className="text-[11px] text-slate-400">通用表格格式</div>
+              <div className="text-[11px] text-slate-400">{tr("通用表格格式")}</div>
             </div>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-400 group-hover:text-blue-600">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -114,7 +116,7 @@ export default function DownloadModal({ isOpen, onClose, result, templateName }:
               <div className="text-sm font-semibold text-slate-700 group-hover:text-blue-700">
                 {baseName}_{dateStr}.json
               </div>
-              <div className="text-[11px] text-slate-400">结构化数据，便于程序处理</div>
+              <div className="text-[11px] text-slate-400">{tr("结构化数据，便于程序处理")}</div>
             </div>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-400 group-hover:text-blue-600">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -135,7 +137,7 @@ export default function DownloadModal({ isOpen, onClose, result, templateName }:
               <polyline points="7 10 12 15 17 10" />
               <line x1="12" y1="15" x2="12" y2="3" />
             </svg>
-            {hasTableData ? '下载 Excel 文件' : '下载 JSON 文件'}
+            {hasTableData ? tr('下载 Excel 文件') : tr('下载 JSON 文件')}
           </button>
         </div>
       </div>

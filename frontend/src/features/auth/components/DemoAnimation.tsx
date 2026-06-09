@@ -1,31 +1,32 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
-const STEPS = [
-  {
-    label: "Step 1",
-    title: "上传文档",
-    desc: "拖拽或选择财务文件",
-  },
-  {
-    label: "Step 2",
-    title: "AI 智能解析",
-    desc: "深度理解文档结构与内容",
-  },
-  {
-    label: "Step 3",
-    title: "生成标准表单",
-    desc: "自动匹配模版，填充结构化数据",
-  },
-  {
-    label: "Complete",
-    title: "转换完成",
-    desc: "原始文件 → 标准化表单",
-  },
-];
+import { useTr } from "@/lib/i18nClient";
 
 export default function DemoAnimation() {
+  const tr = useTr();
+  const STEPS = [
+    {
+      label: "Step 1",
+      title: tr("上传文档"),
+      desc: tr("拖拽或选择财务文件"),
+    },
+    {
+      label: "Step 2",
+      title: tr("AI 智能解析"),
+      desc: tr("深度理解文档结构与内容"),
+    },
+    {
+      label: "Step 3",
+      title: tr("生成标准表单"),
+      desc: tr("自动匹配模版，填充结构化数据"),
+    },
+    {
+      label: "Complete",
+      title: tr("转换完成"),
+      desc: tr("原始文件 → 标准化表单"),
+    },
+  ];
   const [currentStep, setCurrentStep] = useState(0);
   const [progress, setProgress] = useState(0);
 
@@ -96,18 +97,18 @@ export default function DemoAnimation() {
               fill="#ef4444"
             />
           </svg>
-          <span>I Love 财务表单</span>
+          <span>{tr("I Love 财务表单")}</span>
         </div>
 
         {/* Tagline */}
         <h1 className="text-3xl font-bold tracking-tight mb-2 text-slate-800">
           <span className="bg-gradient-to-r from-blue-600 via-purple-500 to-blue-600 bg-clip-text text-transparent animate-gradient">
-            AI 驱动
+            {tr("AI 驱动")}
           </span>
-          ，一键转换财务文件。
+          {tr("，一键转换财务文件。")}
         </h1>
         <p className="text-sm text-slate-400 mb-8 leading-relaxed">
-          上传任意格式的财务文档，AI 自动识别、提取、标准化，秒级生成规范表单。
+          {tr("上传任意格式的财务文档，AI 自动识别、提取、标准化，秒级生成规范表单。")}
         </p>
 
         {/* Demo Box */}
@@ -118,7 +119,7 @@ export default function DemoAnimation() {
             <span className="w-[11px] h-[11px] rounded-full bg-[#febc2e]" />
             <span className="w-[11px] h-[11px] rounded-full bg-[#28c840]" />
             <span className="flex-1 text-center text-xs font-medium text-slate-400 mr-[50px]">
-              智能转换工作流
+              {tr("智能转换工作流")}
             </span>
           </div>
 
@@ -211,7 +212,8 @@ function UploadScene() {
 }
 
 function AIScene({ progress }: { progress: number }) {
-  const chips = ["表头识别", "金额提取", "日期解析", "供应商匹配", "格式标准化"];
+  const tr = useTr();
+  const chips = [tr("表头识别"), tr("金额提取"), tr("日期解析"), tr("供应商匹配"), tr("格式标准化")];
   return (
     <div className="flex flex-col items-center gap-4 animate-fade-in">
       <div className="relative w-[72px] h-[72px]">
@@ -227,7 +229,7 @@ function AIScene({ progress }: { progress: number }) {
         <div className="absolute -inset-7 rounded-full border border-dashed border-blue-100" style={{ animation: "spin-slow 10s linear infinite reverse" }} />
       </div>
       <div className="text-[13px] font-semibold text-slate-700">
-        {progress >= 100 ? "解析完成" : "正在识别..."}
+        {progress >= 100 ? tr("解析完成") : tr("正在识别...")}
       </div>
       <div className="w-[200px]">
         <div className="w-full h-[3px] bg-slate-200 rounded-full overflow-hidden">
@@ -256,6 +258,7 @@ function AIScene({ progress }: { progress: number }) {
 }
 
 function TableScene() {
+  const tr = useTr();
   const data = [
     { date: "09/15", supplier: "华鑫科技", item: "芯片模组 A", qty: "500", amount: "¥75,000" },
     { date: "09/15", supplier: "华鑫科技", item: "连接器 B", qty: "1,200", amount: "¥18,600" },
@@ -267,7 +270,7 @@ function TableScene() {
         <table className="w-full text-[11px]">
           <thead>
             <tr className="bg-slate-50">
-              {["日期", "供应商", "品名", "数量", "金额"].map((h) => (
+              {[tr("日期"), tr("供应商"), tr("品名"), tr("数量"), tr("金额")].map((h) => (
                 <th key={h} className="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">
                   {h}
                 </th>
@@ -292,11 +295,12 @@ function TableScene() {
 }
 
 function CompareScene() {
+  const tr = useTr();
   return (
     <div className="w-full flex gap-3 items-stretch animate-fade-in">
       <div className="flex-1 flex flex-col gap-1.5">
         <div className="text-[10px] font-semibold text-center py-1 rounded-md bg-red-50 text-red-500">
-          原始文件
+          {tr("原始文件")}
         </div>
         <div className="flex-1 bg-slate-50 border border-black/5 rounded-xl p-3 space-y-1.5">
           {[65, 88, 40, 75, 55, 82].map((w, i) => (
@@ -312,7 +316,7 @@ function CompareScene() {
       </div>
       <div className="flex-1 flex flex-col gap-1.5">
         <div className="text-[10px] font-semibold text-center py-1 rounded-md bg-green-50 text-green-500">
-          标准表单
+          {tr("标准表单")}
         </div>
         <div className="flex-1 bg-white border-[1.5px] border-green-400 rounded-xl p-3 space-y-1.5 relative shadow-sm shadow-green-100">
           <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">

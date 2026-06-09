@@ -12,6 +12,7 @@ import DownloadModal from "@/features/dashboard/components/DownloadModal";
 import TemplateCreatorModal from "@/features/dashboard/components/TemplateCreatorModal";
 import EditableForm from "@/features/dashboard/components/EditableForm";
 import { buildNonJsonApiError, parseJsonSafely } from "@/lib/http";
+import { useTr } from "@/lib/i18nClient";
 import { 
   UploadedFile, 
   TemplateType, 
@@ -23,6 +24,7 @@ import {
 
 export default function DashboardPage() {
   const router = useRouter();
+  const tr = useTr();
   const [activeTab, setActiveTab] = useState("document");
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [selectedType, setSelectedType] = useState<TemplateType | null>(null);
@@ -153,10 +155,14 @@ export default function DashboardPage() {
             const inlierRatio = Number(transformQuality.inlierRatio || 0);
             const reproj = Number(transformQuality.reprojectionErrorPx || 0);
             throw new Error(
-              `对齐失败：匹配锚点 ${matchCount}，内点率 ${(inlierRatio * 100).toFixed(1)}%，重投影误差 ${reproj.toFixed(2)}px。原因: ${failures}`
+              tr("对齐失败：匹配锚点 %d，内点率 %s%，重投影误差 %spx。原因: %s")
+                .replace("%d", String(matchCount))
+                .replace("%s", (inlierRatio * 100).toFixed(1))
+                .replace("%s", reproj.toFixed(2))
+                .replace("%s", failures)
             );
           }
-          throw new Error((payload.error as string) || "数据提取失败");
+          throw new Error((payload.error as string) || tr("数据提取失败"));
         }
 
         setExtractDiagnostics({
@@ -192,14 +198,14 @@ export default function DashboardPage() {
         const payload = data && typeof data === "object" ? (data as Record<string, unknown>) : {};
 
         if (!response.ok) {
-          throw new Error((payload.error as string) || "处理失败");
+          throw new Error((payload.error as string) || tr("处理失败"));
         }
 
         setResult(payload as unknown as ProcessResult);
         setStep("result");
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "处理失败，请重试");
+      setError(err instanceof Error ? err.message : tr("处理失败，请重试"));
       setStep("upload");
     } finally {
       setIsProcessing(false);
@@ -236,7 +242,7 @@ export default function DashboardPage() {
       });
 
       if (!response.ok) {
-        let msg = "智能转换失败";
+        let msg = tr("智能转换失败");
         try {
           const errData = await response.json();
           msg = errData.error || msg;
@@ -261,7 +267,7 @@ export default function DashboardPage() {
 
       setStep("upload");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "智能转换失败，请重试");
+      setError(err instanceof Error ? err.message : tr("智能转换失败，请重试"));
       setStep("upload");
     } finally {
       setIsConverting(false);
@@ -297,13 +303,13 @@ export default function DashboardPage() {
                 />
               </svg>
               <h1 className="text-xl font-bold text-slate-800">
-                {step === "editForm" ? "编辑表单" : "上传与识别"}
+                {step === "editForm" ? tr("编辑表单") : tr("上传与识别")}
               </h1>
             </div>
             <p className="text-sm text-slate-400">
-              {step === "editForm" 
-                ? "编辑AI提取的数据，完成后可导出下载" 
-                : "选择模板后上传原始单据，AI自动提取数据生成标准化文件"}
+              {step === "editForm"
+                ? tr("编辑AI提取的数据，完成后可导出下载")
+                : tr("选择模板后上传原始单据，AI自动提取数据生成标准化文件")}
             </p>
           </div>
           {step !== "editForm" && (
@@ -311,7 +317,7 @@ export default function DashboardPage() {
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
               </svg>
-              免费试用
+              {tr("免费试用")}
             </button>
           )}
         </div>
@@ -330,15 +336,15 @@ export default function DashboardPage() {
           )}
           {extractDiagnostics?.extractionMode === "semantic_fallback" && (
             <div className="mb-4 px-4 py-3 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-700">
-              当前提取模式: 语义降级。原因: 模板对齐质量不足，本次未使用坐标对齐，仅按语义字段提取。
+              {tr("当前提取模式: 语义降级。原因: 模板对齐质量不足，本次未使用坐标对齐，仅按语义字段提取。")}
             </div>
           )}
           {extractDiagnostics?.transformQuality && (
             <div className="mb-4 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-600">
-              对齐诊断: 锚点 {extractDiagnostics.transformQuality.inlierCount || 0}/
-              {extractDiagnostics.transformQuality.matchCount || 0}，内点率{" "}
+              {tr("对齐诊断")}: {tr("锚点")} {extractDiagnostics.transformQuality.inlierCount || 0}/
+              {extractDiagnostics.transformQuality.matchCount || 0}，{tr("内点率")}{" "}
               {((extractDiagnostics.transformQuality.inlierRatio || 0) * 100).toFixed(1)}%，
-              重投影误差 {(extractDiagnostics.transformQuality.reprojectionErrorPx || 0).toFixed(2)}px
+              {tr("重投影误差")} {(extractDiagnostics.transformQuality.reprojectionErrorPx || 0).toFixed(2)}px
             </div>
           )}
 
@@ -373,9 +379,9 @@ export default function DashboardPage() {
                         <line x1="16" y1="17" x2="8" y2="17" />
                         <polyline points="10 9 9 9 8 9" />
                       </svg>
-                      <span className="text-slate-500 whitespace-nowrap">上传 Excel 模板（可选）</span>
+                      <span className="text-slate-500 whitespace-nowrap">{tr("上传 Excel 模板（可选）")}</span>
                       <label className="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-medium rounded-lg cursor-pointer transition-colors">
-                        选择文件
+                        {tr("选择文件")}
                         <input
                           type="file"
                           accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -416,10 +422,10 @@ export default function DashboardPage() {
                         </svg>
                       )}
                       {isConverting
-                        ? "AI 正在转换中..."
+                        ? tr("AI 正在转换中...")
                         : templateFile
-                          ? "智能转换（填入你的模板）"
-                          : "智能转换（无需选择模板，直接生成 Excel）"}
+                          ? tr("智能转换（填入你的模板）")
+                          : tr("智能转换（无需选择模板，直接生成 Excel）")}
                     </button>
                   </>
                 )}
@@ -437,9 +443,9 @@ export default function DashboardPage() {
           {step === "upload" && selectedCustomTemplate && (
             <div className="mt-4 px-4 py-3 rounded-xl border border-slate-200 bg-white text-sm text-slate-600 flex items-center justify-between">
               <div>
-                <p className="font-medium text-slate-700">对齐失败时语义降级</p>
+                <p className="font-medium text-slate-700">{tr("对齐失败时语义降级")}</p>
                 <p className="text-xs text-slate-500">
-                  开启后，若坐标对齐失败仍继续提取数据，但不保证版式坐标准确。
+                  {tr("开启后，若坐标对齐失败仍继续提取数据，但不保证版式坐标准确。")}
                 </p>
               </div>
               <label className="inline-flex items-center gap-2 cursor-pointer">
@@ -448,7 +454,7 @@ export default function DashboardPage() {
                   checked={allowSemanticFallback}
                   onChange={(e) => setAllowSemanticFallback(e.target.checked)}
                 />
-                <span className="text-xs text-slate-700">允许降级</span>
+                <span className="text-xs text-slate-700">{tr("允许降级")}</span>
               </label>
             </div>
           )}
@@ -490,6 +496,7 @@ export default function DashboardPage() {
 }
 
 function ProcessingView({ isExtracting = false }: { isExtracting?: boolean }) {
+  const tr = useTr();
   return (
     <div className="flex-1 flex flex-col items-center justify-center animate-fade-in">
       <div className="relative w-24 h-24 mb-6">
@@ -506,12 +513,12 @@ function ProcessingView({ isExtracting = false }: { isExtracting?: boolean }) {
       </div>
 
       <h3 className="text-lg font-bold text-slate-700 mb-2">
-        {isExtracting ? "AI 正在提取数据..." : "AI 正在解析文档..."}
+        {isExtracting ? tr("AI 正在提取数据...") : tr("AI 正在解析文档...")}
       </h3>
       <p className="text-sm text-slate-400 mb-6">
-        {isExtracting 
-          ? "正在从原始单据提取数据并映射到模板字段" 
-          : "正在识别文档结构、提取关键数据并生成标准化表单"}
+        {isExtracting
+          ? tr("正在从原始单据提取数据并映射到模板字段")
+          : tr("正在识别文档结构、提取关键数据并生成标准化表单")}
       </p>
 
       <div className="w-64">
@@ -521,9 +528,9 @@ function ProcessingView({ isExtracting = false }: { isExtracting?: boolean }) {
       </div>
 
       <div className="flex flex-wrap gap-2 justify-center mt-6">
-        {(isExtracting 
-          ? ["字段匹配", "数据提取", "格式转换", "数值解析", "智能填充"]
-          : ["表头识别", "金额提取", "日期解析", "供应商匹配", "格式标准化"]
+        {(isExtracting
+          ? [tr("字段匹配"), tr("数据提取"), tr("格式转换"), tr("数值解析"), tr("智能填充")]
+          : [tr("表头识别"), tr("金额提取"), tr("日期解析"), tr("供应商匹配"), tr("格式标准化")]
         ).map((chip, i) => (
           <span
             key={i}

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { backendBaseUrl } from "@/lib/backendUrl.mjs";
+import { serverTr } from "@/lib/i18n";
 
 export const runtime = "nodejs";
 
@@ -17,14 +18,14 @@ export async function POST(request: NextRequest) {
 
     if (!fileBase64 || !mimeType) {
       return NextResponse.json(
-        { error: "缺少必要参数：fileBase64, mimeType" },
+        { error: serverTr("缺少必要参数：fileBase64, mimeType") },
         { status: 400 }
       );
     }
 
     if (!PYTHON_BACKEND_URL) {
       return NextResponse.json(
-        { error: "未配置 PYTHON_BACKEND_URL，智能转换需要 Python 后端支持" },
+        { error: serverTr("未配置 PYTHON_BACKEND_URL，智能转换需要 Python 后端支持") },
         { status: 501 }
       );
     }
@@ -44,12 +45,12 @@ export async function POST(request: NextRequest) {
       try {
         const errData = await response.json();
         return NextResponse.json(
-          { error: errData.detail || errData.error || "转换失败" },
+          { error: errData.detail || errData.error || serverTr("转换失败") },
           { status: response.status }
         );
       } catch {
         return NextResponse.json(
-          { error: `转换失败 (${response.status})` },
+          { error: `${serverTr("转换失败")} (${response.status})` },
           { status: response.status }
         );
       }
@@ -72,7 +73,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("Convert proxy error:", error);
     const message =
-      error instanceof Error ? error.message : "智能转换失败，请重试";
+      error instanceof Error ? error.message : serverTr("智能转换失败，请重试");
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

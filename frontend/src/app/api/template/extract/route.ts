@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { extractDataToTemplate } from "@/server/ai/kimi";
 import { validateTemplateExtractMimeType } from "@/server/layout/fileTypes.mjs";
 import { getOcrTokens } from "@/server/layout/ocr/provider.mjs";
+import { serverTr } from "@/lib/i18n";
 import { assessLayoutQuality } from "@/server/layout/quality.mjs";
 import {
   normalizeClientOcrTokens,
@@ -48,7 +49,7 @@ export async function POST(request: NextRequest) {
 
     if (!fileBase64 || !mimeType || !templateStructure) {
       return NextResponse.json(
-        { error: "缺少必要参数：fileBase64, mimeType, templateStructure" },
+        { error: serverTr("缺少必要参数：fileBase64, mimeType, templateStructure") },
         { status: 400 }
       );
     }
@@ -58,8 +59,9 @@ export async function POST(request: NextRequest) {
         if (!allowSemanticFallback || strictAlignment) {
         return NextResponse.json(
           {
-            error:
-              "模板质量不足，无法可靠提取。请重新创建模板并确保锚点覆盖率足够。",
+            error: serverTr(
+              "模板质量不足，无法可靠提取。请重新创建模板并确保锚点覆盖率足够。"
+            ),
             quality,
             extractionMode: "aligned",
           },
@@ -102,7 +104,7 @@ export async function POST(request: NextRequest) {
         } else {
         return NextResponse.json(
           {
-            error: "模板与当前文档对齐失败，无法保证导出位置准确。",
+            error: serverTr("模板与当前文档对齐失败，无法保证导出位置准确。"),
             transform,
             transformQuality,
             ocrWarnings: ocrResult.warnings || [],
@@ -142,15 +144,14 @@ export async function POST(request: NextRequest) {
     console.error("Data extraction error:", error);
 
     let message =
-      error instanceof Error ? error.message : "数据提取失败，请重试";
+      error instanceof Error ? error.message : serverTr("数据提取失败，请重试");
 
     if (
       message.includes("fetch failed") ||
       message.includes("getaddrinfo ENOTFOUND") ||
       message.includes("connect ETIMEDOUT")
     ) {
-      message =
-        "无法连接到 AI API，请检查网络连接后重试。";
+      message = serverTr("无法连接到 AI API，请检查网络连接后重试。");
     }
 
     return NextResponse.json({ error: message }, { status: 500 });

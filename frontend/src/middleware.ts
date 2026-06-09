@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { AUTH_COOKIE, expectedAuthToken } from "@/lib/authToken";
+import { serverTr } from "@/lib/i18n";
 
 // Paths reachable without a valid session: the login page itself and the
 // auth endpoints. Everything else (dashboard + all other /api routes) is gated.
@@ -21,7 +22,7 @@ export async function middleware(req: NextRequest) {
   if (token && token === expected) return NextResponse.next();
 
   if (pathname.startsWith("/api/")) {
-    return NextResponse.json({ error: "未授权：请先登录" }, { status: 401 });
+    return NextResponse.json({ error: serverTr("未授权：请先登录") }, { status: 401 });
   }
 
   const url = req.nextUrl.clone();

@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTr } from "@/lib/i18nClient";
 
 export default function LoginForm() {
   const router = useRouter();
+  const tr = useTr();
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -12,7 +14,7 @@ export default function LoginForm() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!password) {
-      setError("请输入访问密码");
+      setError(tr("请输入访问密码"));
       return;
     }
     setError("");
@@ -25,7 +27,7 @@ export default function LoginForm() {
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        setError(data.error || "密码错误，请重试");
+        setError(data.error || tr("密码错误，请重试"));
         return;
       }
       // Keep the existing dashboard client-side guard happy.
@@ -33,7 +35,7 @@ export default function LoginForm() {
       const from = new URLSearchParams(window.location.search).get("from");
       router.push(from && from.startsWith("/") ? from : "/dashboard");
     } catch {
-      setError("登录失败，请检查网络后重试");
+      setError(tr("登录失败，请检查网络后重试"));
     } finally {
       setLoading(false);
     }
@@ -45,20 +47,20 @@ export default function LoginForm() {
         className="text-[28px] font-bold tracking-tight text-slate-800 mb-1.5"
         style={{ fontFamily: "'DM Sans', 'Noto Sans SC', sans-serif" }}
       >
-        访问验证
+        {tr("访问验证")}
       </h2>
       <p className="text-[13px] text-slate-400 mb-9 leading-relaxed">
-        请输入访问密码以继续使用 I Love 财务表单。
+        {tr("请输入访问密码以继续使用 I Love 财务表单。")}
       </p>
 
       <form onSubmit={handleLogin}>
         <div className="mb-5">
           <label className="block text-xs font-medium text-slate-500 mb-1.5 tracking-wide">
-            访问密码
+            {tr("访问密码")}
           </label>
           <input
             type="password"
-            placeholder="请输入访问密码"
+            placeholder={tr("请输入访问密码")}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             autoFocus
@@ -75,7 +77,7 @@ export default function LoginForm() {
           disabled={loading}
           className="w-full py-[13px] bg-blue-600 text-white text-[15px] font-semibold rounded-lg shadow-md shadow-blue-600/25 hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-600/30 hover:-translate-y-0.5 transition-all mt-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
         >
-          {loading ? "验证中…" : "进入"}
+          {loading ? tr("验证中…") : tr("进入")}
         </button>
       </form>
     </div>

@@ -3,6 +3,7 @@
 // drops these — verified by inspecting xl/styles.xml after writeFile.
 import * as XLSX from 'xlsx-js-style';
 import { CustomTemplate, FilledFormData, ProcessResult, TemplateLayout } from "@/features/documents/types";
+import { browserTr } from "@/lib/i18n";
 
 // Group template's static OCR tokens (role==="fixed_text") into reading-order
 // lines, splitting around the table region. Returns plain text rows ready to
@@ -133,7 +134,7 @@ export function exportFilledFormToExcel(
     });
   } else {
     // Fallback: synthetic title row if template has no recognizable header.
-    aoa.push([template.name || "单据", ...Array(totalCols - 1).fill("")]);
+    aoa.push([template.name || browserTr("单据"), ...Array(totalCols - 1).fill("")]);
     merges.push({ s: { r: 0, c: 0 }, e: { r: 0, c: totalCols - 1 } });
     titleCells.push({ r: 0, c: 0 });
   }
@@ -191,9 +192,14 @@ export function exportFilledFormToExcel(
   // 4) Detail table — auto 序号 column only if template doesn't already define one.
   if (tableHeaders.length > 0) {
     pushBlankRow();
-    // Avoid duplicate 序号 column if template already includes it.
-    const headerHasSeq = tableHeaders.some((h) => h === "序号" || h === "序 号");
-    const finalHeaders = headerHasSeq ? tableHeaders : ["序号", ...tableHeaders];
+    // Avoid duplicate index column if template already includes it.
+    // Match both Chinese ("序号"/"序 号") and English ("No.") since the
+    // AI returns headers in the current locale's language.
+    const headerHasSeq = tableHeaders.some(
+      (h) => h === "序号" || h === "序 号" || h === "No." || h === "No" || h === "#"
+    );
+    const seqLabel = browserTr("序号");
+    const finalHeaders = headerHasSeq ? tableHeaders : [seqLabel, ...tableHeaders];
     const finalColCount = finalHeaders.length;
 
     // Header row
@@ -212,8 +218,15 @@ export function exportFilledFormToExcel(
       const rowIdx = aoa.length;
       const out: (string | number)[] = [];
       for (const header of finalHeaders) {
-        if (header === "序号" || header === "序 号") {
-          // Prefer model-provided 序号 if non-empty, else auto-number.
+        if (
+          header === "序号" ||
+          header === "序 号" ||
+          header === seqLabel ||
+          header === "No." ||
+          header === "No" ||
+          header === "#"
+        ) {
+          // Prefer model-provided index if non-empty, else auto-number.
           const provided = row[header];
           out.push(provided !== undefined && provided !== "" ? provided : idx + 1);
         } else {
@@ -283,7 +296,7 @@ export function exportFilledFormToExcel(
     });
   }
 
-  XLSX.utils.book_append_sheet(wb, ws, template.name?.slice(0, 28) || "单据");
+  XLSX.utils.book_append_sheet(wb, ws, template.name?.slice(0, 28) || browserTr("单据"));
 
   const date = new Date().toISOString().split('T')[0];
   const exportFilename = filename || `${template.name}_${date}.xlsx`;
@@ -299,42 +312,45 @@ export function exportProcessResultToExcel(
   
   // Sheet 1: Summary info
   if (result.summary) {
+    const fieldKey = browserTr("字段");
+    const valueKey = browserTr("值");
     const summaryData = Object.entries(result.summary)
       .filter(([, value]) => value)
       .map(([key, value]) => ({
-        '字段': translateSummaryKey(key),
-        '值': value
+        [fieldKey]: translateSummaryKey(key),
+        [valueKey]: value
       }));
     if (summaryData.length > 0) {
       const wsSummary = XLSX.utils.json_to_sheet(summaryData);
-      XLSX.utils.book_append_sheet(wb, wsSummary, '摘要信息');
+      XLSX.utils.book_append_sheet(wb, wsSummary, browserTr('摘要信息'));
     }
   }
-  
+
   // Sheet 2: Table data
   if (result.headers.length > 0 && result.rows.length > 0) {
+    const seqKey = browserTr("序号");
     const tableData = result.rows.map((row, index) => {
-      const rowData: Record<string, string | number> = { '序号': index + 1 };
+      const rowData: Record<string, string | number> = { [seqKey]: index + 1 };
       result.headers.forEach(header => {
         rowData[header] = row[header] || '';
       });
       return rowData;
     });
     const wsTable = XLSX.utils.json_to_sheet(tableData);
-    
+
     // Set column widths
     const colWidths = [{ wch: 6 }];
     result.headers.forEach(() => {
       colWidths.push({ wch: 15 });
     });
     wsTable['!cols'] = colWidths;
-    
-    XLSX.utils.book_append_sheet(wb, wsTable, '明细数据');
+
+    XLSX.utils.book_append_sheet(wb, wsTable, browserTr('明细数据'));
   }
-  
+
   // Generate filename
   const date = new Date().toISOString().split('T')[0];
-  const filename = `${templateName || '财务表单'}_${date}.xlsx`;
+  const filename = `${templateName || browserTr('财务表单')}_${date}.xlsx`;
   
   XLSX.writeFile(wb, filename);
 }
@@ -374,7 +390,7 @@ function downloadBlob(blob: Blob, filename: string): void {
   URL.revokeObjectURL(url);
 }
 
-// Helper: Translate summary keys to Chinese
+// Helper: Translate summary keys to display labels (locale-aware).
 function translateSummaryKey(key: string): string {
   const map: Record<string, string> = {
     totalAmount: '总金额',
@@ -385,7 +401,7 @@ function translateSummaryKey(key: string): string {
     contact: '联系电话',
     address: '地址',
   };
-  return map[key] || key;
+  return browserTr(map[key] || key);
 }
 
 // Get recommended export format based on data type
