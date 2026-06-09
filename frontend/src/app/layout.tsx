@@ -3,6 +3,13 @@ import "./globals.css";
 import { LocaleProvider } from "@/lib/i18nClient";
 import { getServerLocale, serverTr } from "@/lib/i18n";
 
+// Force per-request rendering so process.env.LOCALE is read at runtime in
+// the container, not baked at build time. Without this, Next prerenders
+// the root layout (and therefore <html lang> and the LocaleProvider value)
+// at `next build` — when LOCALE is empty — and serves that frozen HTML
+// forever, defeating the locale switch.
+export const dynamic = "force-dynamic";
+
 export function generateMetadata(): Metadata {
   return {
     title: serverTr("I Love 财务表单 - AI 智能财务文件处理"),
