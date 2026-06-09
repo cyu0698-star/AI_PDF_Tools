@@ -49,3 +49,21 @@ services:
       # ~50s cold-start spin-up (default 10s would fetch-fail every time).
       - key: OCR_HTTP_TIMEOUT_MS
         value: "180000"
+
+  # English-locale frontend. Same codebase, LOCALE=en flips UI + AI prompts
+  # + Excel headers to English. Shares the same Python backend.
+  - type: web
+    name: receiptsys-frontend-en
+    runtime: docker
+    rootDir: frontend
+    dockerfilePath: ./Dockerfile
+    plan: free
+    envVars:
+      - key: LOCALE
+        value: en
+      - key: PYTHON_BACKEND_URL
+        value: https://receiptsys-backend.onrender.com
+      - key: APP_PASSWORD
+        sync: false      # separate password for the English link
+      - key: OCR_HTTP_TIMEOUT_MS
+        value: "180000"
