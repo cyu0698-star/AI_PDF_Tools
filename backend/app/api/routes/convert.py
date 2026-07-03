@@ -25,6 +25,9 @@ class ConvertRequest(BaseModel):
     mimeType: str
     templateBase64: str | None = None
     templateMimeType: str | None = None
+    # Optional UI locale ("zh" | "en"); controls the language of the
+    # fixed labels in the generated Excel. Defaults to zh (legacy behavior).
+    locale: str | None = None
 
 
 @router.post("/api/convert")
@@ -104,7 +107,7 @@ async def convert_document(request: ConvertRequest, fastapi_request: Request):
     else:
         # Original path: generate Excel from scratch
         try:
-            xlsx_bytes = build_excel(structured)
+            xlsx_bytes = build_excel(structured, locale=request.locale)
         except Exception as exc:
             raise HTTPException(status_code=500, detail=f"Excel 生成失败: {exc}") from exc
 

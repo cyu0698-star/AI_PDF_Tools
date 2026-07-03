@@ -24,6 +24,46 @@ _LEFT = Alignment(horizontal="left", vertical="center", wrap_text=True)
 _RIGHT = Alignment(horizontal="right", vertical="center", wrap_text=True)
 
 
+# ---------------------------------------------------------------------------
+# Locale-aware fixed labels
+# ---------------------------------------------------------------------------
+_LABELS: dict[str, dict[str, str]] = {
+    "zh": {
+        "address": "地址",
+        "phone": "电话",
+        "fax": "传真",
+        "counterparty": "客户/供应商",
+        "doc_number": "单号",
+        "date": "日期",
+        "month": "月份",
+        "total": "合计",
+        "tax_rate": "税率",
+        "tax": "税金",
+        "grand_total": "总计（含税）",
+    },
+    "en": {
+        "address": "Address",
+        "phone": "Phone",
+        "fax": "Fax",
+        "counterparty": "Customer/Supplier",
+        "doc_number": "Quote No.",
+        "date": "Date",
+        "month": "Month",
+        "total": "Total",
+        "tax_rate": "Tax Rate",
+        "tax": "Tax",
+        "grand_total": "Total (incl. tax)",
+    },
+}
+
+
+def _normalize_locale(locale: str | None) -> str:
+    """Map any locale string to a supported label set (default zh)."""
+    if locale and locale.strip().lower().startswith("en"):
+        return "en"
+    return "zh"
+
+
 def _try_number(value: Any) -> int | float | str:
     """Try to convert *value* to a number, else return it as string."""
     if isinstance(value, (int, float)):
@@ -48,8 +88,15 @@ def _col_letter(col_index: int) -> str:
     return get_column_letter(col_index)
 
 
-def build_excel(data: dict[str, Any]) -> bytes:
-    """Return an in-memory xlsx file as *bytes* from the structured JSON."""
+def build_excel(data: dict[str, Any], locale: str | None = None) -> bytes:
+    """Return an in-memory xlsx file as *bytes* from the structured JSON.
+
+    ``locale`` selects the language of the fixed labels (meta/summary
+    headers). Supported: "zh" (default) and "en".
+    """
+
+    loc = _normalize_locale(locale)
+    labels = _LABELS[loc]
 
     wb = Workbook()
     ws = wb.active
@@ -82,8 +129,7 @@ def build_excel(data: dict[str, Any]) -> bytes:
     for key in ("address", "phone", "fax"):
         val = (company.get(key) or "").strip()
         if val:
-            label_map = {"address": "地址", "phone": "电话", "fax": "传真"}
-            secondary_lines.append(f"{label_map.get(key, key)}: {val}")
+            secondary_lines.append(f"{labels.get(key, key)}: {val}")
     for line in company.get("other") or []:
         if isinstance(line, str) and line.strip():
             secondary_lines.append(line.strip())
@@ -126,16 +172,16 @@ def build_excel(data: dict[str, Any]) -> bytes:
 
     cp_name = (counterparty.get("name") or "").strip()
     if cp_name:
-        meta_parts.append(f"客户/供应商: {cp_name}")
+        meta_parts.append(f"{labels['counterparty']}: {cp_name}")
     doc_num = (meta.get("documentNumber") or "").strip()
     if doc_num:
-        meta_parts.append(f"单号: {doc_num}")
+        meta_parts.append(f"{labels['doc_number']}: {doc_num}")
     doc_date = (meta.get("date") or "").strip()
     if doc_date:
-        meta_parts.append(f"日期: {doc_date}")
+        meta_parts.append(f"{labels['date']}: {doc_date}")
     doc_month = (meta.get("month") or "").strip()
     if doc_month:
-        meta_parts.append(f"月份: {doc_month}")
+        meta_parts.append(f"{labels['month']}: {doc_month}")
     for k, v in (meta.get("otherMeta") or {}).items():
         if isinstance(v, str) and v.strip():
             meta_parts.append(f"{k}: {v}")
@@ -216,19 +262,23 @@ def build_excel(data: dict[str, Any]) -> bytes:
     summary_lines: list[tuple[str, Any]] = []
 
     total_label = (summary.get("totalLabel") or "").strip()
+    if loc == "en" and total_label in ("合计", "总计", "合计/总计"):
+        # AI may echo the Chinese label from the source document; keep the
+        # EN output consistent with the selected locale.
+        total_label = labels["total"]
     total_amount = summary.get("totalAmount")
     if total_label or total_amount is not None:
-        summary_lines.append((total_label or "合计", total_amount if total_amount is not None else ""))
+        summary_lines.append((total_label or labels["total"], total_amount if total_amount is not None else ""))
 
     tax_rate = summary.get("taxRate")
     tax_amount = summary.get("taxAmount")
     if tax_rate or tax_amount is not None:
-        label = f"税率 {tax_rate}" if tax_rate else "税金"
+        label = f"{labels['tax_rate']} {tax_rate}" if tax_rate else labels["tax"]
         summary_lines.append((label, tax_amount if tax_amount is not None else ""))
 
     grand_total = summary.get("grandTotal")
     if grand_total is not None:
-        summary_lines.append(("总计（含税）", grand_total))
+        summary_lines.append((labels["grand_total"], grand_total))
 
     for k, v in (summary.get("otherSummary") or {}).items():
         summary_lines.append((str(k), v))

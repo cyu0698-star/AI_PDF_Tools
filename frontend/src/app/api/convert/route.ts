@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { backendBaseUrl } from "@/lib/backendUrl.mjs";
-import { serverTr } from "@/lib/i18n";
+import { getServerLocale, serverTr } from "@/lib/i18n";
 
 export const runtime = "nodejs";
 
@@ -30,7 +30,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const payload: Record<string, string> = { fileBase64, mimeType };
+    const payload: Record<string, string> = {
+      fileBase64,
+      mimeType,
+      // Tell the backend which language to use for generated Excel labels
+      // (reads process.env.LOCALE; defaults to "zh").
+      locale: getServerLocale(),
+    };
     if (templateBase64) payload.templateBase64 = templateBase64;
     if (templateMimeType) payload.templateMimeType = templateMimeType;
 
