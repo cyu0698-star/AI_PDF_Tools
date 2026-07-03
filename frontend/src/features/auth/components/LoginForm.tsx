@@ -49,8 +49,11 @@ export default function LoginForm() {
       >
         {tr("访问验证")}
       </h2>
-      <p className="text-[13px] text-slate-400 mb-9 leading-relaxed">
+      <p className="text-[13px] text-slate-400 mb-3 leading-relaxed">
         {tr("请输入访问密码以继续使用 I Love 财务表单。")}
+      </p>
+      <p className="text-[11px] text-slate-400 bg-slate-50 border border-slate-100 rounded-lg px-3 py-2 mb-6 leading-relaxed">
+        {tr("演示环境——所有示例数据均为合成数据，仅用于测试。")}
       </p>
 
       <form onSubmit={handleLogin}>

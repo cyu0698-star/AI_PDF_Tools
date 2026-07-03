@@ -448,7 +448,7 @@ export default function DashboardPage() {
                     <button
                       onClick={handleSmartConvert}
                       disabled={isConverting || isProcessing}
-                      className="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-sm font-semibold rounded-xl shadow-sm shadow-emerald-500/20 hover:from-emerald-600 hover:to-teal-600 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+                      className="w-full py-3 bg-emerald-600 text-white text-sm font-semibold rounded-xl shadow-sm shadow-emerald-600/20 hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
                     >
                       {isConverting ? (
                         <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
@@ -539,7 +539,7 @@ function ProcessingView({ isExtracting = false }: { isExtracting?: boolean }) {
   return (
     <div className="flex-1 flex flex-col items-center justify-center animate-fade-in">
       <div className="relative w-24 h-24 mb-6">
-        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-blue-600 to-purple-500 flex items-center justify-center animate-pulse-ring">
+        <div className="absolute inset-0 rounded-full bg-blue-600 flex items-center justify-center animate-pulse-ring">
           <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M12 2a4 4 0 0 1 4 4c0 1.95-1.4 3.58-3.25 3.93" />
             <path d="M8.25 9.93A4 4 0 0 1 12 2" />
@@ -562,7 +562,7 @@ function ProcessingView({ isExtracting = false }: { isExtracting?: boolean }) {
 
       <div className="w-64">
         <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
-          <div className="h-full rounded-full bg-gradient-to-r from-blue-600 to-purple-500" style={{ animation: "progress-bar 8s ease-in-out infinite" }} />
+          <div className="h-full rounded-full bg-blue-600" style={{ animation: "progress-bar 8s ease-in-out infinite" }} />
         </div>
       </div>
 

@@ -102,9 +102,7 @@ export default function DemoAnimation() {
 
         {/* Tagline */}
         <h1 className="text-3xl font-bold tracking-tight mb-2 text-slate-800">
-          <span className="bg-gradient-to-r from-blue-600 via-purple-500 to-blue-600 bg-clip-text text-transparent animate-gradient">
-            {tr("AI 驱动")}
-          </span>
+          <span className="text-blue-600">{tr("AI 驱动")}</span>
           {tr("，一键转换财务文件。")}
         </h1>
         <p className="text-sm text-slate-400 mb-8 leading-relaxed">
@@ -180,12 +178,13 @@ export default function DemoAnimation() {
 }
 
 function UploadScene() {
+  const tr = useTr();
   return (
     <div className="w-full space-y-2 animate-fade-in">
       <div className="border border-dashed border-blue-300 bg-blue-50/50 rounded-xl p-4 space-y-2">
         {[
-          { name: "2024_Q3_采购订单.pdf", size: "2.4 MB", color: "bg-red-50 text-red-500" },
-          { name: "供应商送货单_0915.jpg", size: "1.1 MB", color: "bg-orange-50 text-orange-500" },
+          { name: tr("2024_Q3_采购订单.pdf"), size: "2.4 MB", color: "bg-red-50 text-red-500" },
+          { name: tr("供应商送货单_0915.jpg"), size: "1.1 MB", color: "bg-orange-50 text-orange-500" },
         ].map((f, i) => (
           <div
             key={i}
@@ -217,7 +216,7 @@ function AIScene({ progress }: { progress: number }) {
   return (
     <div className="flex flex-col items-center gap-4 animate-fade-in">
       <div className="relative w-[72px] h-[72px]">
-        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-blue-600 to-purple-500 flex items-center justify-center animate-pulse-ring">
+        <div className="absolute inset-0 rounded-full bg-blue-600 flex items-center justify-center animate-pulse-ring">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
             <path d="M12 2a4 4 0 0 1 4 4c0 1.95-1.4 3.58-3.25 3.93" />
             <path d="M8.25 9.93A4 4 0 0 1 12 2" />
@@ -234,7 +233,7 @@ function AIScene({ progress }: { progress: number }) {
       <div className="w-[200px]">
         <div className="w-full h-[3px] bg-slate-200 rounded-full overflow-hidden">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-blue-600 to-purple-500 transition-all duration-75"
+            className="h-full rounded-full bg-blue-600 transition-all duration-75"
             style={{ width: `${progress}%` }}
           />
         </div>
@@ -260,9 +259,9 @@ function AIScene({ progress }: { progress: number }) {
 function TableScene() {
   const tr = useTr();
   const data = [
-    { date: "09/15", supplier: "华鑫科技", item: "芯片模组 A", qty: "500", amount: "¥75,000" },
-    { date: "09/15", supplier: "华鑫科技", item: "连接器 B", qty: "1,200", amount: "¥18,600" },
-    { date: "09/16", supplier: "鼎盛材料", item: "PCB 板材", qty: "300", amount: "¥42,300" },
+    { date: "09/15", supplier: tr("华鑫科技"), item: tr("芯片模组 A"), qty: "500", amount: tr("¥75,000") },
+    { date: "09/15", supplier: tr("华鑫科技"), item: tr("连接器 B"), qty: "1,200", amount: tr("¥18,600") },
+    { date: "09/16", supplier: tr("鼎盛材料"), item: tr("PCB 板材"), qty: "300", amount: tr("¥42,300") },
   ];
   return (
     <div className="w-full animate-fade-in-up">
