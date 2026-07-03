@@ -53,6 +53,7 @@ export default function DashboardPage() {
   } | null>(null);
   const [isConverting, setIsConverting] = useState(false);
   const [templateFile, setTemplateFile] = useState<File | null>(null);
+  const [convertDone, setConvertDone] = useState<{ name: string; url: string } | null>(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -217,6 +218,10 @@ export default function DashboardPage() {
 
     setIsConverting(true);
     setError(null);
+    if (convertDone) {
+      URL.revokeObjectURL(convertDone.url);
+      setConvertDone(null);
+    }
     setStep("processing");
 
     try {
@@ -263,8 +268,9 @@ export default function DashboardPage() {
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      URL.revokeObjectURL(url);
 
+      // Keep the blob URL alive so the success panel can re-download it.
+      setConvertDone({ name: downloadName, url });
       setStep("upload");
     } catch (err) {
       setError(err instanceof Error ? err.message : tr("智能转换失败，请重试"));
@@ -324,6 +330,39 @@ export default function DashboardPage() {
 
         {/* Main content */}
         <div className="flex-1 overflow-auto p-8">
+          {convertDone && step === "upload" && (
+            <div className="mb-4 px-5 py-4 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-3 animate-fade-in">
+              <div className="w-9 h-9 rounded-full bg-emerald-500 flex items-center justify-center shrink-0">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-emerald-700">{tr("转换完成！Excel 已自动下载")}</p>
+                <p className="text-xs text-emerald-600 mt-0.5 truncate">
+                  {convertDone.name} · {tr("已保存到浏览器下载目录，请打开核对数据后再使用")}
+                </p>
+              </div>
+              <a
+                href={convertDone.url}
+                download={convertDone.name}
+                className="px-3 py-1.5 bg-white border border-emerald-300 text-emerald-700 text-xs font-semibold rounded-lg hover:bg-emerald-100 transition-colors whitespace-nowrap"
+              >
+                {tr("再次下载")}
+              </a>
+              <button
+                onClick={() => {
+                  URL.revokeObjectURL(convertDone.url);
+                  setConvertDone(null);
+                  setFiles([]);
+                  setTemplateFile(null);
+                }}
+                className="px-3 py-1.5 bg-emerald-600 text-white text-xs font-semibold rounded-lg hover:bg-emerald-700 transition-colors whitespace-nowrap"
+              >
+                {tr("继续转换下一份")}
+              </button>
+            </div>
+          )}
           {error && (
             <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600 flex items-center gap-2 animate-fade-in">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
